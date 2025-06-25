@@ -16,6 +16,7 @@ kubectl apply -f pods.yaml
 # Step 2: Wait for Pods to be Ready
 echo "⌛ Waiting for pods to be ready..."
 kubectl wait --for=condition=ready pod -l app=nginx -n $NAMESPACE --timeout=60s
+sleep 5
 
 # Step 3: Verify Initial Connectivity (Should Succeed)
 echo "✅ Testing initial connectivity using Client 1 (should be allowed)..."
@@ -63,3 +64,13 @@ kubectl exec $BUSYBOX_1_POD -- nslookup example.com
 
 echo "🚨 Testing external HTTP access after 'Allow DNS' (should still fail)..."
 kubectl exec $BUSYBOX_1_POD -- wget --spider -T 5 http://example.com || echo "✅ External HTTP connection still blocked as expected."
+
+# CLEANUP
+echo "🧹 Cleanup..."
+read -p "Delete test namespaces? (y/N): " DEL
+if [[ "$DEL" =~ ^[Yy]$ ]]; then
+  kubectl delete -f .
+  echo "✅ Cleanup completed."
+else
+  echo "⚠️ Remember to clean up manually with: kubectl delete -f ."
+fi
